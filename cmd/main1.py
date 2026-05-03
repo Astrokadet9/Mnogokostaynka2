@@ -1,51 +1,48 @@
-import requests 
-from bs4 import BeautifulSoup
 import time
 
-URL_1 = 'https://habr.com/ru/feed/'
-URL_2 = 'https://www.python.org/'
+import requests
+from bs4 import BeautifulSoup
 
+from utils import check_and_create_result
+
+URL = "https://habr.com/ru/feed/"
+
+# article link
+# article header
+# article views
+# article tags
 def parse_article(article):
-    header = article.find("h2", class_= "tm.title")
+    header = article.find("h2", class_="tm-title")
 
     if header == None:
         raise ValueError('Article do not have header. SKIP...')
 
     header_text = header.find('span').text
-    article_link = header.find('a').atts['href']
-    article_views = article.find('span', class_= "tm-icon-counter__value" ).text
-    # article_tags = list(map(lambda tag: tag.find('span').text, article.find('div',  class_="tm-publications-hubs")))
-    return {'header_text': header_text, 'article_link': article_link, 'article_views': article_views, 'article_tags': article_tags}
+    article_link = header.find('a').attrs['href']
+    article_views = article.find('span', class_="tm-icon-counter__value").text
+    # article_tags = list(map(lambda tag: tag.find('span').text, article.find('div', class_="tm-publication-hubs")))
+    return { 'header_text': header_text, 'article_link': article_link, 'article_views': article_views }
 
 def main():
-    req = requests.get(URL_1, headers={
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36'
+    req = requests.get(URL, headers={
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36'
     })
     if req.status_code == 200:
         soup = BeautifulSoup(req.content, 'html.parser')
-
-        lang_list = soup.find_all('a', class_='link-box')
-
+        articles_list = soup.find_all('article', class_='tm-articles-list__item')
+        
         parsed_articles = []
-            
         for a in articles_list:
             try:
                 parsed_articles.append(parse_article(a))
-            except:
+            except ValueError as e:
                 print(e)
-        print(parsed_articles)
+        
+        result_path = check_and_create_result()
 
-     results_path = check_and_create_result()
-            
         with open(f'{result_path}/habr-result-{time.time()}.txt', 'a', encoding='utf-8') as f:
             for a in parsed_articles:
-                f.write(f'header': {a['header_text']}\nviews: {a['articles_views']}\nlink: https://habr.com/ru/feed/)
-
-    else:
-        print(f'Ошибка запроса\nStatuse Code: {req.status_code}')
-
-
-
+                f.write(f'header: {a['header_text']}\nviews: {a['article_views']}\nlink: https://habr.com{a['article_link']}\n')
 
 if __name__ == '__main__':
-    main()  
+    main()
