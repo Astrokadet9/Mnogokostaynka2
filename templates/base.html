@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    </head>
+
+    <body>
+        <h1>Заголовок</h1>
+        <p1>{{ dis_text }}</p1>
+        <ul>
+            {% for Chiald in Chialds %}
+                <li> 
+                    <em>{{ Chiald.name }}</em>
+                    <em>{{ Chiald.age }}</em>
+
+                </li>
+            {% endfor %}
+        </ul>
+    </body>
+
+</html>
